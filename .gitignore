@@ -1,3 +1,2 @@
-.node_modules/
-./CLI-Javascript-Quiz/node_modules/
-./Blackjack/node_modules/
+node_modules/
+
