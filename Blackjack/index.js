@@ -4,6 +4,7 @@ import { createSpinner } from "nanospinner";
 
 import Card from "./Card.js";
 import Deck from "./deck.js";
+import Blackjack from "./Blackjack.js";
 
 // const jack = new Card("♠", "J");
 // console.log(jack.color);
@@ -12,13 +13,15 @@ import Deck from "./deck.js";
 
 const deck = new Deck();
 
-
-
-
 console.log(`let's draw a card`);
 console.log(deck.drawACard());
-console.log(deck.cards);
+// console.log(deck.cards);
 console.log(deck.cards.length);
+
+const bj = new Blackjack();
+
+await bj.startGame();
+await bj.makeBet();
 
 // console.log("♠", "♥", "♣", "♦");
 // console.log(`${chalk.bgWhite("    ")}`);

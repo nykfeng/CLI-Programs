@@ -4,8 +4,8 @@ export default class Deck {
   #cards = [];
   #suits = ["♠", "♥", "♣", "♦"];
   constructor() {
-      this.createDeck();
-      this.shuffleDeck();
+    this.createDeck();
+    this.shuffleDeck();
   }
 
   get cards() {
@@ -45,7 +45,7 @@ export default class Deck {
 
   shuffleDeck() {
     for (let i = 0; i < this.#cards.length; i++) {
-      let rand = Math.floor(Math.random() * 52);
+      let rand = Math.floor(Math.random() * this.#cards.length);
 
       let temp = new Card(this.#cards[i].suit, this.#cards[i].rank);
 
