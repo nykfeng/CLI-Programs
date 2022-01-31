@@ -62,7 +62,7 @@ export default class Blackjack {
       return;
     } else {
       helper.displaySadness();
-      await this.betValidation();
+      return await this.betValidation();
     }
   }
 
@@ -185,7 +185,7 @@ export default class Blackjack {
       return false;
     } else {
       helper.displaySadness();
-      await this.drawPrompt();
+      return await this.drawPrompt();
     }
   }
 
@@ -198,7 +198,7 @@ export default class Blackjack {
       return false;
     } else {
       helper.displaySadness();
-      await this.validateAnotherRound();
+      return await this.validateAnotherRound();
     }
   }
 
@@ -213,6 +213,7 @@ export default class Blackjack {
   }
 
   async finishGame() {
+    console.log(`Stop!...`);
     this.showHands(false);
 
     const spinner = createSpinner(
