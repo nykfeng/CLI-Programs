@@ -28,6 +28,22 @@ const convertRank = function (rank) {
   }
 };
 
+const displaySadness = function () {
+  console.log(
+    `😔 I am just a program, I can only take yes or no as an answer.`
+  );
+};
+
+const allIner = function (bet, bal) {
+  if (bet === bal) {
+    console.log(
+      `🤩 All in?? That's the spirit. Life is too short to not go all in.`
+    );
+  }
+};
+
 export default {
+  allIner,
   convertRank,
+  displaySadness,
 };

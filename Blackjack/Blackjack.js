@@ -1,10 +1,8 @@
-import chalk from "chalk";
-import inquirer from "inquirer";
 import { createSpinner } from "nanospinner";
 
+import GameSummary from "./GameSummary.js";
 import Deck from "./deck.js";
 import ask from "./ask.js";
-import Card from "./card.js";
 import print from "./print.js";
 import timer from "./timer.js";
 import helper from "./helper.js";
@@ -15,6 +13,8 @@ export default class Blackjack {
   #playerHand = [];
   #dealerHand = [];
   #deck;
+  #gameSummary;
+  #bettingAmount = 0;
 
   set balance(bal) {
     this.#balance = bal;
@@ -24,31 +24,14 @@ export default class Blackjack {
     return this.#balance;
   }
 
-  async timer(ms = 2000) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
-
-  //   async startGame() {
-  //     const spinner = createSpinner("Checking your balance...").start();
-
-  //     setTimeout(() => {
-  //       if (this.balance > 0) {
-  //         spinner.success({
-  //           text: `😎😎 Looks like you've got some money. Let's do it~!`,
-  //         });
-  //       } else {
-  //         spinner.error({ text: `💀💀💀 Lol, you are broke!` });
-  //         process.exit(1);
-  //       }
-  //     }, 2000);
-  //   }
-
   async startGame() {
     this.#playerName = await ask.askName();
     const balance = await ask.startingBalance();
+
     if (parseFloat(balance) > 0) {
       this.#balance = parseFloat(balance);
-      console.log(`Hi ${this.#playerName}`);
+      this.#gameSummary = new GameSummary(this.#balance);
+      console.log(` - Hi ${this.#playerName}`);
       console.log("🤑 🤑 Looks like you've got some money. Let's do it~!");
     } else if (parseFloat(balance) <= 0) {
       console.log(`💀💀💀 Lol, you are broke!`);
@@ -65,10 +48,8 @@ export default class Blackjack {
     do {
       const answers = await ask.bettingAmount();
       amount = parseFloat(answers);
-      //   console.log("amount is ", amount);
+      this.#bettingAmount = amount;
     } while (await this.isNotValid(amount));
-
-    // await this.makeStartingHands();
   }
 
   async betValidation() {
@@ -80,9 +61,7 @@ export default class Blackjack {
     } else if (ans === "yes" || ans === "y") {
       return;
     } else {
-      console.log(
-        `😔 I am just a program, I can only take yes or no as an answer.`
-      );
+      helper.displaySadness();
       await this.betValidation();
     }
   }
@@ -98,6 +77,7 @@ export default class Blackjack {
       return true;
     } else {
       console.log("👍 That is a legit bet!");
+      helper.allIner(this.#bettingAmount, this.#balance);
       return false;
     }
   }
@@ -127,16 +107,27 @@ export default class Blackjack {
     print.hand(this.#dealerHand, true);
     console.log("----------");
 
-    console.log("Your hand");
+    console.log("Player hand");
     print.hand(this.#playerHand);
     console.log();
   }
 
   async game() {
     await this.startGame();
-    await this.makeBet();
-    await this.makeStartingHands();
-    await this.gameState();
+    do {
+      if (this.#gameSummary.balance > 0) {
+        await this.makeBet();
+        await this.makeStartingHands();
+        await this.gameState();
+      } else {
+        console.log("Ooooo, you don't have money~");
+        console.log(
+          "Work hard and come lose again next time. I mean win again next time.😎"
+        );
+        process.exit(0);
+      }
+    } while (await this.validateAnotherRound());
+    this.#gameSummary.display();
   }
 
   async gameState() {
@@ -164,6 +155,7 @@ export default class Blackjack {
         break;
       }
     }
+    this.#gameSummary.displayBalance();
   }
 
   calculate(handOfCards) {
@@ -192,10 +184,21 @@ export default class Blackjack {
     } else if (answer === "no" || answer === "n") {
       return false;
     } else {
-      console.log(
-        `😔 I am just a program, I can only take yes or no as an answer.`
-      );
+      helper.displaySadness();
       await this.drawPrompt();
+    }
+  }
+
+  async validateAnotherRound() {
+    console.log("Woud you like another game?");
+    const ans = await ask.yesOrNo();
+    if (ans === "yes" || ans === "y") {
+      return true;
+    } else if (ans === "no" || ans === "n") {
+      return false;
+    } else {
+      helper.displaySadness();
+      await this.validateAnotherRound();
     }
   }
 
@@ -212,18 +215,30 @@ export default class Blackjack {
   async finishGame() {
     this.showHands(false);
 
-    const spinner = createSpinner("Checking for who wins...").start();
+    const spinner = createSpinner(
+      "Analyzing winner... with my super AI brain💾"
+    ).start();
     await timer.loader();
     const who = this.whoWins();
     if (who === "player") {
       spinner.success({
-        text: `👍 Good work ${this.#playerName}, that was impressive 👏`,
+        text: `👍 Good work ${this.#playerName}, that was impressive 👏\n`,
       });
     } else if (who === "dealer") {
-      spinner.error({ text: `💀 Lol, that was easy money. Thank you!` });
+      spinner.error({
+        text: `💀 Lol, that was easy money. Thank you! ${this.#playerName}\n`,
+      });
     } else {
-      spinner.stop({ text: ` A draw is a draw!` });
+      spinner.stop({ text: ` A draw is a draw!\n` });
     }
+    this.reset();
+  }
+
+  // After a game, player and dealer hands should be reset, and deck too
+  reset() {
+    this.#playerHand = [];
+    this.#dealerHand = [];
+    this.#deck = new Deck();
   }
 
   showHands(fold = true) {
@@ -240,42 +255,61 @@ export default class Blackjack {
 
     console.log();
 
-    console.log("Your hand");
+    console.log("Player hand");
     print.hand(this.#playerHand);
     console.log();
+  }
+
+  setBalance(bal) {
+    this.#balance += bal;
+    this.#gameSummary.addBalance(bal);
   }
 
   whoWins() {
     console.log();
     console.log("Dealer has ", this.calculate(this.#dealerHand));
-    console.log("You have ", this.calculate(this.#playerHand));
+    console.log("Player has ", this.calculate(this.#playerHand));
 
     if (this.calculate(this.#playerHand) > 21) {
       console.log("Dealer wins. ");
+      this.#gameSummary.addGamesLost();
+      this.setBalance(this.#bettingAmount * -1);
+
       return "dealer";
     } else if (
       this.#playerHand.length === 5 &&
       this.calculate(this.#playerHand) <= 21
     ) {
-      console.log("🎉 You win.");
+      console.log("🎉 You win. That's a 5-Card Charlie. Cool!");
+      this.#gameSummary.addGamesWon();
+      this.setBalance(this.#bettingAmount);
+
       return "player";
     } else if (
       this.calculate(this.#playerHand) === this.calculate(this.#dealerHand)
     ) {
       console.log("It's a draw. Can you believe it 🤢");
+      this.#gameSummary.addGamesTied();
       return "draw";
     } else if (
       this.calculate(this.#playerHand) <= 21 &&
       this.calculate(this.#dealerHand) > 21
     ) {
       console.log("🎉 You win.");
+      this.#gameSummary.addGamesWon();
+      this.setBalance(this.#bettingAmount);
       return "player";
     } else {
       if (this.calculate(this.#playerHand) > this.calculate(this.#dealerHand)) {
         console.log("You win.");
+        this.#gameSummary.addGamesWon();
+        this.setBalance(this.#bettingAmount);
+
         return "player";
       } else {
         console.log("Dealer wins. ");
+        this.#gameSummary.addGamesLost();
+        this.setBalance(this.#bettingAmount * -1);
         return "dealer";
       }
     }
