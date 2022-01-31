@@ -1,5 +1,18 @@
 import inquirer from "inquirer";
 
+async function askName() {
+  const answers = await inquirer.prompt({
+    name: "player_name",
+    type: "input",
+    message: "What is your name?",
+    default() {
+      return "Player";
+    },
+  });
+
+  return answers.player_name;
+}
+
 const startingBalance = async function () {
   const answers = await inquirer.prompt({
     name: "balance",
@@ -36,4 +49,4 @@ const yesOrNo = async function () {
   return answers.yes_or_no.toLowerCase();
 };
 
-export default { startingBalance, bettingAmount, yesOrNo };
+export default { askName, startingBalance, bettingAmount, yesOrNo };

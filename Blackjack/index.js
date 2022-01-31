@@ -11,17 +11,19 @@ import Blackjack from "./Blackjack.js";
 
 // console.log(jack.card);
 
-const deck = new Deck();
+// const deck = new Deck();
 
-console.log(`let's draw a card`);
-console.log(deck.drawACard());
-// console.log(deck.cards);
-console.log(deck.cards.length);
+// console.log(`let's draw a card`);
+// console.log(deck.drawACard());
+// // console.log(deck.cards);
+// console.log(deck.cards.length);
 
 const bj = new Blackjack();
 
-await bj.startGame();
-await bj.makeBet();
+// await bj.startGame();
+// await bj.makeBet();
+
+bj.game();
 
 // console.log("♠", "♥", "♣", "♦");
 // console.log(`${chalk.bgWhite("    ")}`);
