@@ -42,8 +42,16 @@ const allIner = function (bet, bal) {
   }
 };
 
+const lostAndGone = function () {
+  console.log("Ooooo, you don't have money~");
+  console.log(
+    "Work hard and come lose again next time. I mean win again next time.😎\n"
+  );
+};
+
 export default {
   allIner,
   convertRank,
   displaySadness,
+  lostAndGone,
 };

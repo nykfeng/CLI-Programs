@@ -25,6 +25,7 @@ export default class Blackjack {
   }
 
   async startGame() {
+    console.log("😃 Welcome to the Blackjack table~!");
     this.#playerName = await ask.askName();
     const balance = await ask.startingBalance();
 
@@ -112,24 +113,23 @@ export default class Blackjack {
     console.log();
   }
 
+  // entire game process
   async game() {
     await this.startGame();
     do {
-      if (this.#gameSummary.balance > 0) {
+      if (this.#balance > 0) {
         await this.makeBet();
         await this.makeStartingHands();
         await this.gameState();
       } else {
-        console.log("Ooooo, you don't have money~");
-        console.log(
-          "Work hard and come lose again next time. I mean win again next time.😎"
-        );
+        helper.lostAndGone();
         process.exit(0);
       }
     } while (await this.validateAnotherRound());
     this.#gameSummary.display();
   }
 
+  // Each round process, including each time a card is drawn
   async gameState() {
     while (
       this.#playerHand.length != 5 ||
@@ -158,6 +158,7 @@ export default class Blackjack {
     this.#gameSummary.displayBalance();
   }
 
+  // calculate the points a player or dealer has
   calculate(handOfCards) {
     let sum = 0;
     let hasA = 0;
@@ -172,7 +173,6 @@ export default class Blackjack {
     if (hasA > 0) {
       if (21 - (sum + 10) >= 0 && 21 - (sum + 10) < 21 - sum) return sum + 10;
     }
-    // console.log("sum is ", sum);
     return sum;
   }
 
@@ -190,7 +190,7 @@ export default class Blackjack {
   }
 
   async validateAnotherRound() {
-    console.log("Woud you like another game?");
+    console.log("Would you like another game?");
     const ans = await ask.yesOrNo();
     if (ans === "yes" || ans === "y") {
       return true;
@@ -202,6 +202,7 @@ export default class Blackjack {
     }
   }
 
+  // After player stop drawing cards, dealer will play too
   dealerPlay() {
     while (
       this.calculate(this.#dealerHand) < 18 &&
@@ -212,6 +213,7 @@ export default class Blackjack {
     }
   }
 
+  // Closing up the game
   async finishGame() {
     console.log(`Stop!...`);
     this.showHands(false);
@@ -242,6 +244,7 @@ export default class Blackjack {
     this.#deck = new Deck();
   }
 
+  // Show both players hands
   showHands(fold = true) {
     // console.clear();
 
@@ -261,6 +264,7 @@ export default class Blackjack {
     console.log();
   }
 
+  // Set balance to both the object balance and game summary balance each time it is changed
   setBalance(bal) {
     this.#balance += bal;
     this.#gameSummary.addBalance(bal);
